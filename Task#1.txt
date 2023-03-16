@@ -1,0 +1,93 @@
+DATA: https://www.kaggle.com/code/dimarudov/data-analysis-using-sql/input
+
+/*Qustion 1*/
+/*Top Build Up Play Speed and their countries*/
+
+SELECT DISTINCT 
+l.name as "League Name",
+t.team_long_name as "Team Name", 
+ta.buildUpPlaySpeed as "Build Up Play Speed", 
+ta.buildUpPlayPassing as "Build Up Play Passing"
+FROM Team_Attributes ta, Team t, Matchh m, league l
+ON ta.team_api_id = t.team_api_id
+AND m.home_team_api_id = ta.team_api_id
+AND m.league_id=l.id
+ORDER by ta.buildUpPlaySpeed desc
+LIMIT 10
+
+/*Qustion 2*/
+/*Top 10 Teams Score goals Away, Home TEAM, Average_home_goals, Average_away_goals and Total_Goals*/
+
+SELECT t.team_long_name as Team_Name,
+SUM(m.home_team_goal) as Home_Team_Goal,
+ROUND(AVG(CAST(m.home_team_goal as float)), 3) as Average_home_goals, 
+SUM(m.away_team_goal) as Away_Team_Goal,
+ROUND(AVG(CAST(m.away_team_goal as float)), 3) as Average_away_goals,
+SUM(Home_Team_Goal+away_team_goal) as Total_Goals
+FROM Team t, Matchh m
+ON m.home_team_api_id = t.team_api_id or m.away_team_api_id = t.team_api_id
+GROUP BY t.team_long_name
+ORDER BY SUM(m.home_team_goal) DESC
+limit 100
+
+/*Question 3*/
+/*FC Barcelona players from 2008 to 2016*/
+SELECT DISTINCT p.player_name as "Player Name"
+FROM Player p, Matchh m, Team t
+ON (t.team_api_id = m.home_team_api_id ) 
+AND (m.home_player_1 = p.player_api_id
+OR m.home_player_2 = p.player_api_id
+OR m.home_player_3 = p.player_api_id
+OR m.home_player_4 = p.player_api_id
+OR m.home_player_6 = p.player_api_id
+OR m.home_player_7 = p.player_api_id
+OR m.home_player_8 = p.player_api_id
+OR m.home_player_9 = p.player_api_id
+OR m.home_player_10 = p.player_api_id
+OR m.home_player_11 = p.player_api_id)
+WHERE t.team_long_name = "FC Barcelona"
+
+/*Question 4*/
+/*player played for more than one team*/
+SELECT Player_Name, count(Team_Name) as Number_Of_Teams
+FROM(
+SELECT p.player_name as Player_Name, 
+t.team_long_name as Team_Name
+FROM Player p, Matchh m, Team t
+ON (t.team_api_id = m.home_team_api_id ) 
+AND (m.home_player_1 = p.player_api_id
+OR m.home_player_2 = p.player_api_id
+OR m.home_player_3 = p.player_api_id
+OR m.home_player_4 = p.player_api_id
+OR m.home_player_6 = p.player_api_id
+OR m.home_player_7 = p.player_api_id
+OR m.home_player_8 = p.player_api_id
+OR m.home_player_9 = p.player_api_id
+OR m.home_player_10 = p.player_api_id
+OR m.home_player_11 = p.player_api_id)
+GROUP BY Player_Name, Team_Name
+ORDER BY Player_Name
+)
+GROUP BY Player_Name
+HAVING Number_Of_Teams > 2
+ORDER BY Number_Of_Teams DESC
+
+/*Question 5*/
+/*Teams that mo Salah play with*/
+SELECT DISTINCT p.player_name as "Player_Name", 
+t.team_long_name as "Team_Name"
+FROM Player p, Matchh m, Team t
+ON (t.team_api_id = m.home_team_api_id ) 
+AND (m.home_player_1 = p.player_api_id
+OR m.home_player_2 = p.player_api_id
+OR m.home_player_3 = p.player_api_id
+OR m.home_player_4 = p.player_api_id
+OR m.home_player_6 = p.player_api_id
+OR m.home_player_7 = p.player_api_id
+OR m.home_player_8 = p.player_api_id
+OR m.home_player_9 = p.player_api_id
+OR m.home_player_10 = p.player_api_id
+OR m.home_player_11 = p.player_api_id)
+WHERE p.player_name = "Mohamed Salah"
+GROUP BY Player_Name, Team_Name
+
